@@ -13,10 +13,10 @@ class Program
     Exit
     }
 
-    public static List<string> GetData()
+    public static List<string> GetData(string path)
 {
     var entries = new List<string>();
-    using (var db = new SqliteConnection("Data Source=ToDo.db"))
+    using (var db = new SqliteConnection("Data Source="+path))
     {
         db.Open();
         var selectCommand = new SqliteCommand
@@ -33,9 +33,9 @@ class Program
     return entries;
 }
 
-public static void AddData(string inputText)
+public static void AddData(string inputText, string path)
 {
-    using (var db = new SqliteConnection("Data Source=ToDo.db"))
+    using (var db = new SqliteConnection("Data Source="+path))
     {
         db.Open();
 
@@ -51,16 +51,14 @@ public static void AddData(string inputText)
 
 }
 
-public static void DeleteData(string inputText)
+public static void DeleteData(string inputText, string path)
 {
-    using (var db = new SqliteConnection("Data Source=ToDo.db"))
+    using (var db = new SqliteConnection("Data Source="+path))
     {
         db.Open();
 
         var insertCommand = new SqliteCommand();
         insertCommand.Connection = db;
-
-        // Use parameterized query to prevent SQL injection attacks
         insertCommand.CommandText = "DELETE from items where list_item = @Entry;";
         insertCommand.Parameters.AddWithValue("@Entry", inputText);
 
@@ -68,10 +66,18 @@ public static void DeleteData(string inputText)
     }
 
 }
+
+public static string SetPath()
+{
+    Console.WriteLine("Enter path for to-do database:");
+    string userpath = Console.ReadLine();
+    return userpath;
+}
     static void Main(string[] args)
     {
+       string path_name = SetPath();
        List<string> toDoList = new List<string>();
-       toDoList = GetData();
+       toDoList = GetData(path_name);
 
        while (true) {
 
@@ -96,7 +102,7 @@ public static void DeleteData(string inputText)
             Console.Write("Enter task: "); 
             string task = Console.ReadLine(); 
             toDoList.Add(task); 
-            AddData(task);
+            AddData(task, path_name);
             Console.Clear(); 
             Console.WriteLine("Task added successfully!");
         } else if (choice == (int)UserChoice.Exit) { 
@@ -115,7 +121,7 @@ public static void DeleteData(string inputText)
             if (taskNum >= 0 && taskNum < toDoList.Count) { 
                 var deleted_item = toDoList[taskNum];
                 toDoList.RemoveAt(taskNum); 
-                DeleteData(deleted_item);
+                DeleteData(deleted_item, path_name);
                 Console.Clear(); 
                 Console.WriteLine("Task deleted successfully!"); 
                 Console.WriteLine("");
